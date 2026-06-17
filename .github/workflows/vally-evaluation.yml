@@ -133,7 +133,7 @@ jobs:
             [ -n "$spec" ] || continue
             echo "Linting $spec"
             vally lint --eval-spec "$spec" \
-              --grader-plugin tests/scenarios/_shared/vally/grader-plugins/rust-cargo-build-failure \
+              --grader-plugin "$GITHUB_WORKSPACE/tests/scenarios/_shared/vally/grader-plugins/rust-cargo-build-failure" \
               --strict
           done
 
@@ -153,7 +153,7 @@ jobs:
 
           echo "Running Vally eval for ${#args[@]} argument entries"
           vally eval "${args[@]}" \
-            --grader-plugin tests/scenarios/_shared/vally/grader-plugins/rust-cargo-build-failure \
+            --grader-plugin "$GITHUB_WORKSPACE/tests/scenarios/_shared/vally/grader-plugins/rust-cargo-build-failure" \
             --junit --output-dir vally-results --workers 2
 
       - name: Skip eval when token is unavailable
