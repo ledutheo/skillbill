@@ -14,7 +14,7 @@ This directory contains integration tests for every script in `tools/`.
 From the repository root:
 
 ```powershell
-node evals/azure-storage-blob-rust/tools/tests/run-tools-tests.mjs
+node tests/scenarios/_shared/vally/tools/tests/run-tools-tests.mjs
 ```
 
 ## Notes

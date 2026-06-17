@@ -206,7 +206,7 @@ For `tests/scenarios/azure-storage-blob-rust/vally/eval.yaml`, reference the ski
 ```yaml
 environment:
   skills:
-    - ../../../../.github/skills/azure-storage-blob-rust
+    - ../../../../.github/plugins/azure-sdk-rust/skills/azure-storage-blob-rust
 ```
 
 ## Evaluation Scoring
