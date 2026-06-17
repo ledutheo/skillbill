@@ -28,7 +28,7 @@ Use this skill when:
 cargo add azure_security_keyvault_secrets azure_identity tokio futures
 ```
 
-> **Do not** add `azure_core` directly to `Cargo.toml`. It is re-exported by `azure_security_keyvault_secrets`.
+> If your code uses `azure_core` types directly, add `azure_core` to `Cargo.toml`. If you only use `azure_security_keyvault_secrets` re-exports, direct `azure_core` dependency is optional.
 
 ## Environment Variables
 
@@ -130,22 +130,12 @@ while let Some(secret) = pager.try_next().await? {
 ## Error Handling
 
 ```rust
-use azure_core::{error::ErrorKind, http::StatusCode};
-
 match client.get_secret("secret-name", None).await {
-    Ok(response) => println!("Secret: {:?}", response.into_model()?.value),
-    Err(e) => match e.kind() {
-        ErrorKind::HttpResponse { status, error_code, .. }
-            if *status == StatusCode::NotFound =>
-        {
-            println!("Secret not found");
-            if let Some(code) = error_code {
-                println!("ErrorCode: {code}");
-            }
-        }
-        _ => println!("Error: {e:?}"),
-    },
+    Ok(response) => println!("Secret Value: {:?}", response.into_model()?.value),
+    Err(err) => println!("Error: {:#?}", err.into_inner()?),
 }
+
+// Error output includes structured ErrorResponse with code and message
 ```
 
 ## RBAC Roles
@@ -159,16 +149,18 @@ For Entra ID auth, assign one of these roles:
 
 ## Best Practices
 
-1. **Use `DeveloperToolsCredential` for local development and `ManagedIdentityCredential` for production.** The Rust SDK does not support `DefaultAzureCredential`, so explicitly use the appropriate credential in each environment.
-2. **Use `.into_model()` for response conversion.** When retrieving secrets, use `.into_model()?` to convert HTTP responses into typed secret objects.
-3. **Assign appropriate RBAC roles for Entra ID auth.** For production authentication using Entra ID, ensure the identity has the necessary RBAC role assigned (e.g., "Key Vault Secrets User" for secret reads).
-4. **Always verify package versions using crates.io.** Before using a package, check its version on [crates.io](https://crates.io/) to ensure you are using a stable and supported release.
-5. **Never hardcode credentials** — use environment variables or managed identity
-6. **Reuse clients** — `SecretClient` is thread-safe; create once, share across tasks
+1. **Use `cargo add` to manage dependencies, never edit `Cargo.toml` directly.** Add and remove Rust SDK dependencies with cargo commands instead of manual manifest edits.
+2. **Add `azure_core` only when importing `azure_core` types directly.** If your code imports `azure_core::http::Url`, `azure_core::http::RequestContent`, or `azure_core::error::ErrorKind`, include `azure_core`; otherwise a direct dependency is optional.
+3. **Use `DeveloperToolsCredential`** for local dev, **`ManagedIdentityCredential`** for production — Rust does not provide a single `DefaultAzureCredential` type
+4. **Never hardcode credentials** — use environment variables or managed identity
+5. **Use `..Default::default()`** with `#[allow(clippy::needless_update)]` for model struct updates
+6. **Use `ResourceExt`** to extract resource name/version from secret IDs
+7. **Reuse clients** — `SecretClient` is thread-safe; create once, share across tasks
 
 ## Reference Links
 
-| Resource      | Link                                                     |
-| ------------- | -------------------------------------------------------- |
-| API Reference | https://docs.rs/azure_security_keyvault_secrets          |
-| crates.io     | https://crates.io/crates/azure_security_keyvault_secrets |
+| Resource      | Link                                                                                               |
+| ------------- | -------------------------------------------------------------------------------------------------- |
+| API Reference | https://docs.rs/azure_security_keyvault_secrets/latest/azure_security_keyvault_secrets             |
+| crates.io     | https://crates.io/crates/azure_security_keyvault_secrets                                           |
+| Source Code   | https://github.com/Azure/azure-sdk-for-rust/tree/main/sdk/keyvault/azure_security_keyvault_secrets |

@@ -28,7 +28,7 @@ Use this skill when:
 cargo add azure_messaging_eventhubs azure_identity tokio futures
 ```
 
-> **Do not** add `azure_core` directly to `Cargo.toml`. It is re-exported by `azure_messaging_eventhubs`.
+> If your code uses `azure_core` types directly, add `azure_core` to `Cargo.toml`. If you only use `azure_messaging_eventhubs` re-exports, direct `azure_core` dependency is optional.
 
 ## Environment Variables
 
@@ -138,16 +138,18 @@ For Entra ID auth, assign one of these roles:
 
 ## Best Practices
 
-1. **Use `DeveloperToolsCredential` for local development and `ManagedIdentityCredential` for production.** The Rust SDK does not support `DefaultAzureCredential`, so explicitly use the appropriate credential in each environment.
-2. **Use batching for throughput optimization.** Call `create_batch()` to build batches of events, then send with `send_batch()` instead of sending individual events.
-3. **Assign appropriate RBAC roles for Entra ID auth.** For production authentication using Entra ID, ensure the identity has the necessary RBAC role assigned (e.g., "Azure Event Hubs Data Sender" for sending, "Azure Event Hubs Data Receiver" for receiving).
-4. **Always verify package versions using crates.io.** Before using a package, check its version on [crates.io](https://crates.io/) to ensure you are using a stable and supported release.
-5. **Never hardcode credentials** — use environment variables or managed identity
-6. **Handle errors per event** — match on `Ok`/`Err` in the event stream to handle per-event failures gracefully
+1. **Use `cargo add` to manage dependencies, never edit `Cargo.toml` directly.** Add and remove Rust SDK dependencies with cargo commands instead of manual manifest edits.
+2. **Add `azure_core` only when importing `azure_core` types directly.** If your code imports `azure_core::http::Url`, `azure_core::http::RequestContent`, or `azure_core::error::ErrorKind`, include `azure_core`; otherwise a direct dependency is optional.
+3. **Use `DeveloperToolsCredential`** for local dev, **`ManagedIdentityCredential`** for production — Rust does not provide a single `DefaultAzureCredential` type
+4. **Never hardcode credentials** — use environment variables or managed identity
+5. **Use batching** — `create_batch` + `send_batch` for throughput optimization
+6. **Handle errors per event** — match on `Ok`/`Err` in the event stream
+7. **Specify start position** — use `StartLocation::Earliest` or `StartLocation::Latest` to control where consumption begins
 
 ## Reference Links
 
-| Resource      | Link                                               |
-| ------------- | -------------------------------------------------- |
-| API Reference | https://docs.rs/azure_messaging_eventhubs          |
-| crates.io     | https://crates.io/crates/azure_messaging_eventhubs |
+| Resource      | Link                                                                                          |
+| ------------- | --------------------------------------------------------------------------------------------- |
+| API Reference | https://docs.rs/azure_messaging_eventhubs/latest/azure_messaging_eventhubs                    |
+| crates.io     | https://crates.io/crates/azure_messaging_eventhubs                                            |
+| Source Code   | https://github.com/Azure/azure-sdk-for-rust/tree/main/sdk/eventhubs/azure_messaging_eventhubs |

@@ -24,7 +24,7 @@ jobs:
   vally:
     runs-on: ubuntu-latest
     env:
-      GH_TOKEN: ${{ secrets.COPILOT_TOKEN }}
+      GH_TOKEN: ${{ secrets.COPILOT_TOKEN || '' }}
 
     steps:
       - uses: actions/checkout@v4
