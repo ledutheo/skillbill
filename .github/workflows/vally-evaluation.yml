@@ -115,6 +115,14 @@ jobs:
             echo "No eval specs resolved from this event."
           fi
 
+      - name: Build rust-cargo-build-failure grader plugin
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd tests/scenarios/_shared/vally/grader-plugins/rust-cargo-build-failure
+          npm install
+          npm run build
+
       - name: Lint Vally eval specs
         if: ${{ steps.specs.outputs.has_specs == 'true' }}
         shell: bash
@@ -124,7 +132,9 @@ jobs:
           for spec in "${SPECS[@]}"; do
             [ -n "$spec" ] || continue
             echo "Linting $spec"
-            vally lint --eval-spec "$spec" --strict
+            vally lint --eval-spec "$spec" \
+              --grader-plugin tests/scenarios/_shared/vally/grader-plugins/rust-cargo-build-failure \
+              --strict
           done
 
       - name: Run Vally evaluations
@@ -142,7 +152,9 @@ jobs:
           done
 
           echo "Running Vally eval for ${#args[@]} argument entries"
-          vally eval "${args[@]}" --junit --output-dir vally-results --workers 2
+          vally eval "${args[@]}" \
+            --grader-plugin tests/scenarios/_shared/vally/grader-plugins/rust-cargo-build-failure \
+            --junit --output-dir vally-results --workers 2
 
       - name: Skip eval when token is unavailable
         if: ${{ steps.specs.outputs.has_specs == 'true' && env.GH_TOKEN == '' }}
