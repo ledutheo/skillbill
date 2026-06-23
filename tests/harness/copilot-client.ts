@@ -259,7 +259,15 @@ Generate only code. Follow the patterns from the skill documentation exactly.
           rawResponse,
         };
       } finally {
-        await session.destroy();
+        const s = session as unknown as {
+          disconnect?: () => Promise<void>;
+          destroy?: () => Promise<void>;
+        };
+        if (typeof s.disconnect === "function") {
+          await s.disconnect();
+        } else if (typeof s.destroy === "function") {
+          await s.destroy();
+        }
       }
     } finally {
       await client.stop();
