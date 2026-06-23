@@ -62,14 +62,6 @@ def expected_link_target(link_path: pathlib.Path, src_skill_dir: pathlib.Path) -
     return os.path.relpath(src_skill_dir, start=link_path.parent)
 
 
-def readlink_target(path: pathlib.Path) -> str | None:
-    if not path.exists() and not path.is_symlink():
-        return None
-    if not path.is_symlink():
-        return None
-    return os.readlink(path)
-
-
 def ensure_symlink(link_path: pathlib.Path, source_dir: pathlib.Path) -> None:
     desired = expected_link_target(link_path, source_dir)
 
